@@ -6,10 +6,15 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 import sqlite3
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 load_dotenv()
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 chroma_client = chromadb.PersistentClient(path = "./chroma_store")
@@ -50,7 +55,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 def home():
-    return {"message": "AI Attendance Assistant is running"}
+    return FileResponse("static/index.html")
 
 @app.post("/chat")
 def chat(request: ChatRequest):
