@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 import os
 import sqlite3
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
+import csv
+import io
 
 load_dotenv()
 
@@ -96,3 +98,39 @@ def chat(request: ChatRequest):
 @app.get("/health")
 def health():
     return{"status": "ok"}
+
+@app.get("/download")
+def download_csv(name: str = None, month: str = None):
+    
+    # Connect to SQLite
+    conn = sqlite3.connect(r"D:\PROJECTS\Face_recognition\instance\attendance.db")
+    cursor = conn.cursor()
+    
+    # Build query based on filters
+    query = "SELECT name, date, time FROM attendance WHERE 1=1"
+    params = []
+    
+    if name:
+        query += " AND LOWER(name) = LOWER(?)"
+        params.append(name)
+    
+    if month:
+        query += " AND strftime('%m', date) = ?"
+        params.append(month.zfill(2))
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Create CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Name", "Date", "Time"])
+    writer.writerows(rows)
+    output.seek(0)
+    
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode()),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=attendance.csv"}
+    )

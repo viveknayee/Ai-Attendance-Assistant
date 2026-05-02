@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Attendance Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             background: #f5f5f0;
@@ -74,8 +79,14 @@
             scrollbar-color: #e5e5e0 transparent;
         }
 
-        .chatbox::-webkit-scrollbar { width: 4px; }
-        .chatbox::-webkit-scrollbar-thumb { background: #e5e5e0; border-radius: 4px; }
+        .chatbox::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chatbox::-webkit-scrollbar-thumb {
+            background: #e5e5e0;
+            border-radius: 4px;
+        }
 
         .welcome {
             text-align: center;
@@ -99,7 +110,9 @@
             align-items: flex-start;
         }
 
-        .message-row.user { flex-direction: row-reverse; }
+        .message-row.user {
+            flex-direction: row-reverse;
+        }
 
         .avatar {
             width: 30px;
@@ -113,8 +126,15 @@
             flex-shrink: 0;
         }
 
-        .avatar.ai { background: #1a1a1a; color: white; }
-        .avatar.user { background: #e8e8e3; color: #1a1a1a; }
+        .avatar.ai {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .avatar.user {
+            background: #e8e8e3;
+            color: #1a1a1a;
+        }
 
         .bubble {
             max-width: 78%;
@@ -161,12 +181,25 @@
             animation: bounce 1.2s infinite;
         }
 
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
         }
 
         .input-area {
@@ -191,8 +224,14 @@
             transition: border-color 0.2s;
         }
 
-        .input-area input:focus { border-color: #aaa; background: #fff; }
-        .input-area input::placeholder { color: #bbb; }
+        .input-area input:focus {
+            border-color: #aaa;
+            background: #fff;
+        }
+
+        .input-area input::placeholder {
+            color: #bbb;
+        }
 
         .input-area button {
             background: #1a1a1a;
@@ -207,100 +246,159 @@
             transition: opacity 0.2s;
         }
 
-        .input-area button:hover { opacity: 0.85; }
-        .input-area button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .input-area button:hover {
+            opacity: 0.85;
+        }
+
+        .input-area button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .download-area {
+            padding: 12px 24px;
+            border-top: 1px solid #e5e5e0;
+            display: flex;
+            gap: 10px;
+            background: #f5f5f0;
+        }
+
+        .download-area input {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #e5e5e0;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            padding: 9px 14px;
+            outline: none;
+        }
+
+        .download-area button {
+            background: #fff;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 9px 16px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .download-area button:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="header">
-        <div class="header-icon">AI</div>
-        <div>
-            <h1>Attendance Assistant</h1>
-            <p>Powered by RAG + Groq</p>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">AI</div>
+            <div>
+                <h1>Attendance Assistant</h1>
+                <p>Powered by RAG + Groq</p>
+            </div>
+        </div>
+
+        <div class="chatbox" id="chatbox">
+            <div class="welcome">
+                <strong>Hello, Welcome</strong>
+                Ask me anything about your attendance data.
+            </div>
+        </div>
+        <div class="download-area">
+            <input type="text" id="dlname" placeholder="Name (optional)" />
+            <input type="text" id="dlmonth" placeholder="Month e.g. 3 for March (optional)" />
+            <button onclick="downloadCSV()">Download CSV</button>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userinput" placeholder="Ask about attendance..." />
+            <button id="sendbtn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
-    <div class="chatbox" id="chatbox">
-        <div class="welcome">
-            <strong>Hello, Welcome</strong>
-            Ask me anything about your attendance data.
-        </div>
-    </div>
+    <script>
+        const chatbox = document.getElementById("chatbox");
+        const userinput = document.getElementById("userinput");
+        const sendbtn = document.getElementById("sendbtn");
 
-    <div class="input-area">
-        <input type="text" id="userinput" placeholder="Ask about attendance..." />
-        <button id="sendbtn" onclick="sendMessage()">Send</button>
-    </div>
-</div>
+        userinput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
 
-<script>
-    const chatbox = document.getElementById("chatbox");
-    const userinput = document.getElementById("userinput");
-    const sendbtn = document.getElementById("sendbtn");
+        async function sendMessage() {
+            const question = userinput.value.trim();
+            if (!question) return;
 
-    userinput.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") sendMessage();
-    });
+            addMessage(question, "user");
+            userinput.value = "";
+            sendbtn.disabled = true;
 
-    async function sendMessage() {
-        const question = userinput.value.trim();
-        if (!question) return;
-
-        addMessage(question, "user");
-        userinput.value = "";
-        sendbtn.disabled = true;
-
-        const typingRow = document.createElement("div");
-        typingRow.className = "typing-row";
-        typingRow.id = "typing";
-        typingRow.innerHTML = `
+            const typingRow = document.createElement("div");
+            typingRow.className = "typing-row";
+            typingRow.id = "typing";
+            typingRow.innerHTML = `
             <div class="avatar ai">AI</div>
             <div class="typing-dots">
                 <span></span><span></span><span></span>
             </div>`;
-        chatbox.appendChild(typingRow);
-        chatbox.scrollTop = chatbox.scrollHeight;
+            chatbox.appendChild(typingRow);
+            chatbox.scrollTop = chatbox.scrollHeight;
 
-        try {
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: question })
-            });
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: question })
+                });
 
-            const data = await response.json();
-            document.getElementById("typing").remove();
-            addMessage(data.answer, "ai");
+                const data = await response.json();
+                document.getElementById("typing").remove();
+                addMessage(data.answer, "ai");
 
-        } catch (error) {
-            document.getElementById("typing").remove();
-            addMessage("Connection error. Is the server running?", "ai");
+            } catch (error) {
+                document.getElementById("typing").remove();
+                addMessage("Connection error. Is the server running?", "ai");
+            }
+
+            sendbtn.disabled = false;
+            userinput.focus();
         }
 
-        sendbtn.disabled = false;
-        userinput.focus();
-    }
+        function addMessage(text, sender) {
+            const row = document.createElement("div");
+            row.className = `message-row ${sender}`;
 
-    function addMessage(text, sender) {
-        const row = document.createElement("div");
-        row.className = `message-row ${sender}`;
+            const avatar = document.createElement("div");
+            avatar.className = `avatar ${sender}`;
+            avatar.textContent = sender === "user" ? "You" : "AI";
 
-        const avatar = document.createElement("div");
-        avatar.className = `avatar ${sender}`;
-        avatar.textContent = sender === "user" ? "VN" : "AI";
+            const bubble = document.createElement("div");
+            bubble.className = `bubble ${sender}`;
+            bubble.textContent = text;
 
-        const bubble = document.createElement("div");
-        bubble.className = `bubble ${sender}`;
-        bubble.textContent = text;
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            chatbox.appendChild(row);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+        function downloadCSV() {
+            const name = document.getElementById("dlname").value.trim();
+            const month = document.getElementById("dlmonth").value.trim();
 
-        row.appendChild(avatar);
-        row.appendChild(bubble);
-        chatbox.appendChild(row);
-        chatbox.scrollTop = chatbox.scrollHeight;
-    }
-</script>
+            let url = "/download?";
+            if (name) url += `name=${encodeURIComponent(name)}&`;
+            if (month) url += `month=${encodeURIComponent(month)}`;
+
+            window.open(url, "_blank");
+        }
+    </script>
 
 </body>
+
 </html>
