@@ -5,7 +5,7 @@ from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
-
+DB_PATH = os.getenv("DB_PATH")
 app = Flask(__name__)
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -15,7 +15,7 @@ history = [
 ]
 
 def fetch_attendance():
-    conn = sqlite3.connect(r"D:\PROJECTS\Face_recognition\instance\attendance.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT name, date, time FROM attendance ORDER BY date DESC;")
     rows = cursor.fetchall()

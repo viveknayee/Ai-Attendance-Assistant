@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
+DB_PATH = os.getenv("DB_PATH")
 # --- Step 1: Fetch attendance data from FaceAttend DB ---
 def fetch_attendance():
-    conn = sqlite3.connect(r"D:\PROJECTS\Face_recognition\instance\attendance.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT name, date, time FROM attendance ORDER BY date DESC;")
     rows = cursor.fetchall()

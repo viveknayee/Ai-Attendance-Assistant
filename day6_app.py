@@ -12,6 +12,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 chroma_client = chromadb.PersistentClient(path="./chroma_store")
 collection = chroma_client.get_or_create_collection(name="attendance")
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+DB_PATH = os.getenv("DB_PATH")
 
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ def sync_chromadb():
     existing = collection.get()
     existing_ids = set(existing['ids'])
 
-    conn = sqlite3.connect(r"D:\PROJECTS\Face_recognition\instance\attendance.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, date, time FROM attendance")
     rows = cursor.fetchall()

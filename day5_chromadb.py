@@ -1,16 +1,17 @@
 from sentence_transformers import SentenceTransformer
 import chromadb
 import sqlite3
+import os
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
-
+DB_PATH = os.getenv("DB_PATH")
 # Open ChromaDB
 client = chromadb.PersistentClient(path = "./chroma_store")
 collection = client.get_or_create_collection(name = "attendance")
 
 # Fetch data from SQLite
 def fetch_attendance():
-    conn = sqlite3.connect(r"D:\PROJECTS\Face_recognition\instance\attendance.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, date, time FROM attendance ORDER BY date DESC;")
     rows = cursor.fetchall()
